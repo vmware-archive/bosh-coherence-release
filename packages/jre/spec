@@ -1,0 +1,7 @@
+---
+name: jre
+
+dependencies: []
+
+files:
+#- jre/jre-7u51-linux-x64.tar.gz

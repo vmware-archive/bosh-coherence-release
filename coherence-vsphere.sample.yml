@@ -1,0 +1,89 @@
+meta:
+  stemcell:
+    name: bosh-vsphere-esxi-ubuntu-trusty
+    version: '2624'
+# EDIT ME - edit the master list of ips which coherence members would connect to form the cluster
+master_ips: &master-ip-list
+   - 10.85.29.32
+   - 10.85.29.36
+   - 10.85.29.40
+
+director_uuid: EDIT_ME # EDIT ME
+
+name: coherence
+
+releases:
+- name: coherence
+  version: latest
+
+compilation:
+  cloud_properties:
+    name: goose
+  network: coherence-network
+  reuse_compilation_vms: true
+  workers: 1
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 1
+  update_watch_time: 1000-60000
+
+jobs:
+- instances: 3
+  name: coherence-master-node
+  networks:
+  - name: coherence-network
+    static_ips: *master-ip-list
+  resource_pool: coherence-resource-pool
+  templates:
+  - name: coherence_node
+    version: latest
+- instances: 4
+  name: coherence-slave-node
+  networks:
+  - name: coherence-network
+  resource_pool: coherence-resource-pool
+  templates:
+  - name: coherence_node
+    version: latest
+
+networks:
+- name: coherence-network
+  subnets:
+  - range: 10.85.29.0/24 # EDIT ME
+    gateway: 10.85.29.1 # EDIT ME
+    cloud_properties:
+      name: goose # EDIT ME
+    dns:
+    - 10.85.29.91 # EDIT ME
+    - 10.80.130.1 # EDIT ME
+    reserved:
+    - 10.85.29.2-10.85.29.25 # EDIT ME
+    - 10.85.29.41-10.85.29.254 # EDIT ME
+    static:
+    - 10.85.29.32 # EDIT ME
+    - 10.85.29.35 # EDIT ME
+    - 10.85.29.40 # EDIT ME
+
+resource_pools:
+- cloud_properties:
+      name: goose # EDIT ME
+  name: coherence-resource-pool
+  network: coherence-network
+  size: 3
+  stemcell:
+    name: bosh-vsphere-esxi-ubuntu-trusty
+    version: '2624'
+
+properties:
+  networks:
+    apps: "coherence-network"
+  coherence:
+    jvm_args: -Xmx256m -Xms256m -verbose:gc
+    cluster:
+      name: testCluster
+    machines: *master-ip-list
+    listener:
+     port: 9099
+

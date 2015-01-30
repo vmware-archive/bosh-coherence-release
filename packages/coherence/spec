@@ -1,0 +1,9 @@
+---
+name: coherence
+
+dependencies: []
+
+files:
+- cluster-cache-config.xml
+- tangosol-coherence-override.xml
+#- coherence/coherence.jar

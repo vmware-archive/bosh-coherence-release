@@ -1,0 +1,370 @@
+meta:
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+# EDIT ME -- edit the master ip list so coherence master servers will listen on this fixed ip while the slaves can connect to them to join the cluster
+master_ips: &master-ip-list
+   - 10.244.2.2
+   - 10.244.2.6
+   - 10.244.2.10
+
+director_uuid: 35b3e645-7b07-435a-bfab-69f718e0e8ef
+
+name: coherence
+
+releases:
+- name: coherence
+  version: latest
+
+compilation:
+  cloud_properties:
+    name: random
+  network: coherence-network
+  reuse_compilation_vms: true
+  workers: 2
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 2
+  update_watch_time: 1000-60000
+
+jobs:
+- instances: 3
+  name: coherence-master-node
+  networks:
+  - name: coherence-network
+    static_ips: *master-ip-list
+  resource_pool: coherence-resource-pool
+  templates:
+  - name: coherence_node
+    version: latest
+- instances: 5
+  name: coherence-slave-node
+  networks:
+  - name: coherence-network
+  resource_pool: coherence-resource-pool
+  templates:
+  - name: coherence_node
+    version: latest
+
+# When running on bosh-lite warden containers, need to specify explicitly the ips that can be used, as warden seems to trip over ips 10.244.2.24
+# With a given subnet, the ips can only be static or dynamic, not both
+# We want 3 master nodes running with static ips - so we call that out specifically and assign them the ips...
+# If we specify each of the ips as static, there wont be anything for dynamic in that subnet and we will get error abt unable to assign any dynamic ip
+# For the rest slave nodes, we want them to be dynamic but then again we want to ensure they dont use bad ips that warden might reject or have trouble with.
+# So, provide the subnet range with the CIDR set to 30, only 2 ips are allowed and when we reserve the first one, then
+# that leaves only one ip... for the dyanmic, we set static to empty arry or leave it empty but need to specify the subnet/range
+# Example: 10.244.2.0/30 provides 10.244.2.1 and 10.244.2.2, with network as 10.244.2.0 and broadcast as 10.244.2.3
+# The subnets were generated using the warden_networks.rb file after editing the network ranges
+networks:
+- name: coherence-network
+  subnets:
+  - cloud_properties:
+      name: random
+    range: 10.244.2.0/30
+    reserved:
+    - 10.244.2.1
+    static:
+    - 10.244.2.2
+  - cloud_properties:
+      name: random
+    range: 10.244.2.4/30
+    reserved:
+    - 10.244.2.5
+    static:
+    - 10.244.2.6
+  - cloud_properties:
+      name: random
+    range: 10.244.2.8/30
+    reserved:
+    - 10.244.2.9
+    static:
+    - 10.244.2.10
+  - cloud_properties:
+      name: random
+    range: 10.244.2.12/30
+    reserved:
+    - 10.244.2.13
+    static:
+    - 10.244.2.14
+  - cloud_properties:
+      name: random
+    range: 10.244.2.16/30
+    reserved:
+    - 10.244.2.17
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.20/30
+    reserved:
+    - 10.244.2.21
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.24/30
+    reserved:
+    - 10.244.2.25
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.28/30
+    reserved:
+    - 10.244.2.29
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.32/30
+    reserved:
+    - 10.244.2.33
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.36/30
+    reserved:
+    - 10.244.2.37
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.40/30
+    reserved:
+    - 10.244.2.41
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.44/30
+    reserved:
+    - 10.244.2.45
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.48/30
+    reserved:
+    - 10.244.2.49
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.52/30
+    reserved:
+    - 10.244.2.53
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.56/30
+    reserved:
+    - 10.244.2.57
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.60/30
+    reserved:
+    - 10.244.2.61
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.64/30
+    reserved:
+    - 10.244.2.65
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.68/30
+    reserved:
+    - 10.244.2.69
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.72/30
+    reserved:
+    - 10.244.2.73
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.76/30
+    reserved:
+    - 10.244.2.77
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.80/30
+    reserved:
+    - 10.244.2.81
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.84/30
+    reserved:
+    - 10.244.2.85
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.88/30
+    reserved:
+    - 10.244.2.89
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.92/30
+    reserved:
+    - 10.244.2.93
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.96/30
+    reserved:
+    - 10.244.2.97
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.100/30
+    reserved:
+    - 10.244.2.101
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.104/30
+    reserved:
+    - 10.244.2.105
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.108/30
+    reserved:
+    - 10.244.2.109
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.112/30
+    reserved:
+    - 10.244.2.113
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.116/30
+    reserved:
+    - 10.244.2.117
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.120/30
+    reserved:
+    - 10.244.2.121
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.124/30
+    reserved:
+    - 10.244.2.125
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.128/30
+    reserved:
+    - 10.244.2.129
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.132/30
+    reserved:
+    - 10.244.2.133
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.136/30
+    reserved:
+    - 10.244.2.137
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.140/30
+    reserved:
+    - 10.244.2.141
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.144/30
+    reserved:
+    - 10.244.2.145
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.148/30
+    reserved:
+    - 10.244.2.149
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.152/30
+    reserved:
+    - 10.244.2.153
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.156/30
+    reserved:
+    - 10.244.2.157
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.160/30
+    reserved:
+    - 10.244.2.161
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.164/30
+    reserved:
+    - 10.244.2.165
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.168/30
+    reserved:
+    - 10.244.2.169
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.172/30
+    reserved:
+    - 10.244.2.173
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.176/30
+    reserved:
+    - 10.244.2.177
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.180/30
+    reserved:
+    - 10.244.2.181
+    static: []
+  - cloud_properties:
+      name: random
+    range: 10.244.2.184/30
+    reserved:
+    - 10.244.2.185
+    static: []
+
+resource_pools:
+- cloud_properties:
+    name: random
+  name: coherence-resource-pool
+  network: coherence-network
+  size: 8
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+
+properties:
+  networks:
+    apps: "coherence-network"
+  coherence:
+    jvm_args: -Xmx256m -Xms256m -verbose:gc
+    cluster:
+      name: testCluster
+    machines: *master-ip-list
+    listener:
+     port: 9099
+

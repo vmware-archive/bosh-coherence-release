@@ -1,0 +1,27 @@
+---
+name: coherence_node
+templates:
+  ctl.erb: bin/ctl
+packages:
+- jre
+- coherence
+properties:
+  networks.apps:
+    description: "Used to get IP address for coherence node "
+    default: coherence_node
+  coherence.jvm_args:
+    description: "JVM Command line args including memory for the coherence server"
+    default: -Xms256m -Xmx256m -verbose:gc 
+  coherence.cluster.name:
+    description: "Details of the coherence cluster"
+    default: testCluster 
+  coherence.listener.type: 
+    description: "Type of Listener - valid entries multicast or unicast"
+  coherence.listener.address: 
+    description: "Multicast Address to listen on for multicast listener "
+  coherence.listener.port: 
+    description: "Address port to for the listener"
+  coherence.listener.ttl: 
+    description: "Multicast TTL"
+  coherence.machines: 
+    description: "IPs of coherence_node machines"

@@ -1,0 +1,6 @@
+check process coherence_node
+  with pidfile /var/vcap/sys/run/coherence_node/pid
+  start program "/var/vcap/jobs/coherence_node/bin/ctl start"
+     with timeout 60 seconds
+  stop program "/var/vcap/jobs/coherence_node/bin/ctl stop"
+  group vcap

@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -x -e
+RUN_DIR=/var/vcap/sys/run/coherence_node
+LOG_DIR=/var/vcap/sys/log/coherence_node
+PIDFILE=${RUN_DIR}/pid
+
+export JAVA_HOME=/var/vcap/packages/jre
+export COHERENCE_HOME=/var/vcap/packages/coherence/
+export COHERENCE_CONF=/var/vcap/packages/coherence/conf
+export COHERENCE_LIB=/var/vcap/packages/coherence/lib
+
+export PATH=$JAVA_HOME/bin:$PATH
+export CLASSPATH=$CLASSPATH:${COHERENCE_CONF}:${COHERENCE_LIB}/*
+export LOCAL_IP=`ifconfig | grep "inet addr" | grep -v 127.0.0.1 | awk '{print $2 }' | cut -d':' -f 2`
+
+export COHERENCE_CACHE_CONFIG_FILE=`find $COHERENCE_CONF -name "*cache*.xml"`
+export COHERENCE_OVERRIDE_FILE=`find $COHERENCE_CONF -name "*override*.xml"`
+export COHERENCE_CACHE_CONFIG_ARG=" -Dtangosol.coherence.cacheconfig=${COHERENCE_CACHE_CONFIG_FILE} "
+
+export JVM_ARGS=' -Xmx250m -Xms250m -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps '
+
+export my_ip='<%=spec.networks.send(properties.networks.apps).ip %>'
+
+<% if properties.coherence.jvm_args %>
+  export JVM_ARGS='<%=properties.coherence.jvm_args %>  -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps'
+<% end %>
+
+<% if properties.coherence.cluster %>
+
+  <% if properties.coherence.cluster.name %>
+    export cluster_name='<%= properties.coherence.cluster.name %>'
+    export COHERENCE_CLUSTER_ARGS="$COHERENCE_CLUSTER_ARGS -Dtangosol.coherence.cluster=$cluster_name"
+  <% end %>
+
+  <% if properties.coherence.listener %>
+    port='<%= properties.coherence.listener.port %>'
+
+    <% if properties.coherence.machines %>
+      echo Machine Ips : <%= p("coherence.machines") %>
+      <% index = 0 %>
+      <% port = p("coherence.listener.port") %>
+      <% if p("coherence.machines").length > 1 %>
+        WKA_SOCKET_ADDRESSES='<%= p("coherence.machines").reject { |ip| ip == $my_ip }.map do |m|
+        index = index+1
+        " <socket-address id=\"#{index}\"> \\n <address>#{m}</address>\\n<port>#{port}</port>\\n </socket-address>\\n" end
+        .join(" ") %>'
+       <% end %>
+     <% end %>
+  <% end %>
+<% end %>
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    touch $PIDFILE
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR $PIDFILE
+
+    sed -i.bak  "s#<!-- PLACEHOLDER FOR WKA-SOCKET-ADDRESS -->#${WKA_SOCKET_ADDRESSES}#" $COHERENCE_OVERRIDE_FILE
+#    sed -i.bak  "s#MEMBER_LOCAL_ADDR#${my_ip}#" $COHERENCE_OVERRIDE_FILE
+    sed -i.bak  "s#MEMBER_LOCAL_PORT#${port}#" $COHERENCE_OVERRIDE_FILE
+
+#         ${COHERENCE_CLUSTER_ARGS}                 \
+#         ${COHERENCE_CACHE_CONFIG_ARG}             \
+
+
+    java ${JVM_ARGS}                               \
+         com.tangosol.net.DefaultCacheServer       \
+         >  $LOG_DIR/coherence_node.stdout.log     \
+         2> $LOG_DIR/coherence_node.stderr.log &
+    echo $! > $PIDFILE
+    ;;
+
+  stop)
+
+    kill -9 `cat $PIDFILE`
+
+    rm -f $PIDFILE
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac

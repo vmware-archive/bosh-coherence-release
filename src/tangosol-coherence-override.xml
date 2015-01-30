@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+<coherence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns="http://xmlns.oracle.com/coherence/coherence-operational-config"
+   xsi:schemaLocation="http://xmlns.oracle.com/coherence/coherence-operational-config coherence-operational-config.xsd">
+   <cluster-config>
+      <unicast-listener>
+        <well-known-addresses>
+          <!-- Don't edit following lines -->
+          <!-- PLACEHOLDER FOR WKA-SOCKET-ADDRESS -->
+          <!--
+           <socket-address id="1">
+               <address>10.1.1.3</address>
+               <port>9099</port>
+           </socket-address>
+         <address system-property="tangosol.coherence.localhost">MEMBER_LOCAL_ADDR</address>
+           -->
+         </well-known-addresses>
+         <port system-property="tangosol.coherence.localport">MEMBER_LOCAL_PORT</port>
+         <port-auto-adjust system-property="tangosol.coherence.localport.adjust"> true </port-auto-adjust>
+      </unicast-listener>
+   </cluster-config>
+</coherence>

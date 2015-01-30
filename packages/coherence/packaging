@@ -1,0 +1,17 @@
+# abort script on any command that exits with a non zero value
+set -e -x
+
+# The BOSH_INSTALL_TARGET for this package is /var/vcap/packages/coherence
+#
+COHERENCE_CONF_DIR=${BOSH_INSTALL_TARGET}/conf/
+COHERENCE_LIB_DIR=${BOSH_INSTALL_TARGET}/lib/
+
+mkdir -p ${COHERENCE_CONF_DIR}
+mkdir -p ${COHERENCE_LIB_DIR}
+
+# Both the xml and coherence.jar should be available from the BOSH_COMPILE_TARGET
+# as we specified them in the spec file..
+# The xml file would come from release/src folder
+# The jar file would come from the blobs...
+cp -a *.xml ${COHERENCE_CONF_DIR}
+cp -a coherence/*.jar ${COHERENCE_LIB_DIR}

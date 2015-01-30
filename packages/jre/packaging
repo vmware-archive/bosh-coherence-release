@@ -1,0 +1,25 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+# The BOSH_INSTALL_TARGET for this package is /var/vcap/packages/jre
+#
+#+ CUR_DIR=/var/vcap/data/compile/jre
+#+ BOSH_INSTALL_TARGET=/var/vcap/packages/jre
+#+ ls
+#jre
+#packaging
+#+ ls jre packaging
+#packaging
+#
+#jre:
+#jre-7u51-linux-x64.tar.gz
+#+ cp jre/jre-7u51-linux-x64.tar.gz /var/vcap/packages/jre
+CUR_DIR=`pwd`
+cp j*/j*.tar.gz $BOSH_INSTALL_TARGET
+pushd $BOSH_INSTALL_TARGET
+tar xzf  j*.tar.gz
+rm -rf j*.tar.gz 
+mv j* old-jre
+mv old-jre/* .
+rm -rf old-jre
+popd
