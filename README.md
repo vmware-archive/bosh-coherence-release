@@ -1,3 +1,5 @@
+# bosh-coherence-release is no longer actively maintained by VMware.
+
 # bosh-coherence-release
 Bosh release for Oracle Coherence cache servers (Experimental) on bosh-lite
 
